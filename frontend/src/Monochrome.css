@@ -1,0 +1,127 @@
+/* Identidad monocromática para el producto; los rásteres satelitales conservan su escala de datos. */
+:root {
+  color-scheme: light;
+  --mono-ink: #111;
+  --mono-text: #222;
+  --mono-muted: #666;
+  --mono-line: #d5d5d5;
+  --mono-soft: #f3f3f3;
+  --mono-white: #fff;
+}
+
+body { color:var(--mono-text); background:#ededed; }
+.app { color:var(--mono-text); background:transparent; isolation:isolate; }
+.app::before { background:#ffffffbd; }
+.dashboard-video { z-index:-2; }
+.chat-toggle, .chat-header { background:#111; color:#fff; }
+.chat-body, .chat-window .assistant-form { background:#f3f3f3; }
+.chat-window .assistant-question { background:#333; color:#fff; }
+.navigation-rail, .navigation-bar { color:#fff; background:#111; box-shadow:none; }
+.rail-brand, .rail-footer { border-color:#444; }
+.rail-brand small, .rail-icon, .nav-icon { color:#ddd; }
+.navigation-rail button, .navigation-bar .nav-button { color:#f5f5f5; }
+.navigation-rail button:hover, .navigation-rail button.active,
+.navigation-bar .nav-button:hover, .navigation-bar .nav-button.active,
+.nav-menu-toggle { color:#fff; background:#444; }
+.navigation-rail button.active, .navigation-bar .nav-button.active { box-shadow:inset 0 -3px #fff; border-left-color:#fff; }
+.navigation-rail button:focus-visible, .navigation-bar button:focus-visible,
+.nav-language select:focus-visible { outline-color:#fff; }
+.nav-menu { color:#fff; background:#1b1b1b; border-color:#555; }
+.nav-language select { color:#111; background:#fff; border-color:#aaa; }
+
+.dashboard-toolbar, .field-summary, .workspace-heading, .layout,
+.field-summary-grid > div, .metric-card, .welcome, .guide-section,
+.clima-anual, .rotacion, .sowing, .calendario-agricola, .team-page,
+.team-card, .assistant-page-intro, .app-footer,
+.map-panel, .map-controls, .calendar-card, .forecast-card,
+.crop-card, .chat-panel, .assistant-panel, .panel {
+  color:var(--mono-text); background:var(--mono-white); border-color:var(--mono-line);
+}
+.welcome { background:#222; color:#fff; }
+.welcome::before { background:linear-gradient(110deg,#111,#444); }
+.welcome *, .welcome h1, .welcome p, .welcome small { color:#fff; }
+.dashboard-toolbar { border-bottom-color:var(--mono-line); box-shadow:0 2px 8px #0000000c; }
+.dashboard-toolbar label, .dashboard-toolbar select { color:#222; background:#f6f6f6; border-color:#ccc; }
+.dashboard-data-status strong, .dashboard-data-status small,
+.field-summary-grid strong, .field-summary-grid p,
+.team-page > h1, .team-card h2 { color:var(--mono-ink); }
+.field-summary-grid p, .team-page > p:not(.eyebrow), .team-card p,
+.field-summary-grid small, .field-summary-note, .intro, .eyebrow,
+.source, .explanation, .guide-section p, .workspace-heading p { color:var(--mono-muted); }
+.field-summary-heading a, .primary-action, .assistant-page-intro button,
+.sowing button.active, .gpm-history button, .field-summary-grid a {
+  color:#fff; background:#111; border-color:#111;
+}
+.field-summary-heading a:hover, .primary-action:hover, .gpm-history button:hover { background:#444; }
+a, .app-footer button, .sowing a, .assistant-note a { color:#222; }
+button, input, select, textarea { accent-color:#222; }
+input, select, textarea, .dashboard-toolbar select, .panel select {
+  color:#111; background:#fff; border-color:#aaa;
+}
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline:3px solid #555; outline-offset:2px;
+}
+.metrics div, .field-summary-grid > div, .chat-data-cards,
+.calendar-day, .months button, .sowing-note, .notice,
+.chat-data-card, .assistant-note, .gpm-history {
+  color:#222; background:#f4f4f4; border-color:#d5d5d5;
+}
+.metrics span, .calendar-hint, .weekday, .chat-data-cards dt { color:#666; }
+.metrics strong, .chat-data-cards dd, .result-heading h3 { color:#111; }
+.status, .verde, .amarillo, .rojo, .calendar-day.available,
+.months button.active, .crop-heading span { color:#111; background:#eee; border-color:#aaa; }
+.verde .dot, .amarillo .dot, .rojo .dot, .dot { background:#555; }
+.calendar-day.selected { border-color:#111; box-shadow:inset 0 0 0 1px #111; }
+.dashboard-load-error, .error { color:#222; background:#eee; border-color:#aaa; }
+.dashboard-load-error button, .error button { color:#111; background:#fff; border-color:#888; }
+.calendar-nav button { color:#111; background:#fff; border-color:#aaa; }
+.app-footer { border-top-color:#ccc; }
+.team-card { box-shadow:0 5px 18px #00000010; }
+.team-card img { background:#eee; }
+
+/* Mantener colores originales de las capas de mapa y sus leyendas científicas. */
+.leaflet-container, .leaflet-pane, .leaflet-tile, .leaflet-overlay-pane,
+.leaflet-marker-pane, .leaflet-popup-pane, .field-map .map-legend,
+.field-map .map-layer-control, .heat-map, .temperature-legend,
+.satellite-layer, .raster-layer { filter:none; }
+
+@media (max-width:760px) {
+  .navigation-bar, .navigation-rail { background:#111; }
+  .nav-menu { background:#1b1b1b; }
+}
+
+/* Portada clara y directa, inspirada en la composición de referencia. */
+.navigation-bar { min-height:76px; padding-inline:clamp(20px,5vw,96px); border-bottom:1px solid #383838; }
+.nav-brand { min-width:240px; }
+.nav-brand strong { font-size:25px; letter-spacing:-.04em; }
+.nav-brand small { display:none; }
+.navigation-bar .nav-button { font-size:15px; font-weight:600; color:#bcbcbc; }
+.navigation-bar .nav-button.active { color:#fff; background:transparent; box-shadow:none; }
+.navigation-bar .nav-button:hover { color:#fff; background:#303030; }
+.navigation-bar .nav-icon { display:none; }
+.app[data-page="contenido-principal"] { display:flex; flex-direction:column; }
+.app[data-page="contenido-principal"]::before { background:#08090dbb; }
+.app[data-page="contenido-principal"] .dashboard-toolbar { order:2; position:relative; top:auto; }
+.app[data-page="contenido-principal"] .welcome { order:1; width:100%; max-width:none; min-height:calc(100svh - 76px); margin:0; padding:clamp(60px,8vw,110px) 24px; display:grid; place-items:center; border:0; border-radius:0; text-align:center; background:transparent; }
+.app[data-page="contenido-principal"] .welcome::before { background:radial-gradient(ellipse at center,#0b0e13b3 0%,#08090dee 75%); }
+.app[data-page="contenido-principal"] .welcome-copy { width:min(100%,950px); max-width:none; margin:auto; }
+.app[data-page="contenido-principal"] .welcome .eyebrow { color:#fff; font-size:14px; font-weight:750; letter-spacing:.18em; }
+.app[data-page="contenido-principal"] .welcome h1 { margin:30px 0 22px; color:#fff; font-size:clamp(64px,11vw,130px); line-height:1; letter-spacing:-.075em; }
+.app[data-page="contenido-principal"] .welcome p:not(.eyebrow) { max-width:760px; margin-inline:auto; color:#c7c9cc; font-size:clamp(20px,2.3vw,30px); line-height:1.4; }
+.app[data-page="contenido-principal"] .hero-actions { display:flex; justify-content:center; flex-wrap:wrap; gap:18px; margin-top:60px; }
+.app[data-page="contenido-principal"] .hero-actions a { min-width:220px; min-height:60px; justify-content:center; padding:16px 26px; border-radius:12px; font-size:18px; font-weight:750; text-decoration:none; }
+.app[data-page="contenido-principal"] .hero-primary { color:#111; background:#fff; border:1px solid #fff; }
+.app[data-page="contenido-principal"] .hero-secondary { color:#fff; background:#1119; border:1px solid #fff; }
+.hero-scroll { display:block; margin-top:45px; color:#fff; font-size:24px; }
+.app[data-page="contenido-principal"] .guide-section { order:4; }
+.app[data-page="contenido-principal"] main { order:3; width:100%; }
+.app[data-page="contenido-principal"] .team-page { order:5; }
+.app[data-page="contenido-principal"] .app-footer { order:6; }
+@media(max-width:700px) {
+  .navigation-bar { padding-inline:14px; }
+  .nav-brand { min-width:0; }
+  .nav-brand strong { font-size:19px; }
+  .app[data-page="contenido-principal"] .welcome { min-height:calc(100svh - 68px); }
+  .app[data-page="contenido-principal"] .hero-actions { margin-top:34px; }
+  .app[data-page="contenido-principal"] .hero-actions a { width:100%; }
+}

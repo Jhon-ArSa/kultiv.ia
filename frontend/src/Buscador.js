@@ -1,6 +1,6 @@
+import { apiFetch } from './api';
 import { useTranslation } from "./i18n";
 import React, { useState } from 'react';
-const API = process.env.REACT_APP_API_URL || '/api';
 export default function Buscador({
   seleccionar
 }) {
@@ -19,7 +19,7 @@ export default function Buscador({
     setEstado('Buscando…');
     setResultados([]);
     try {
-      const respuesta = await fetch(`${API}/buscar?q=${encodeURIComponent(texto.trim())}`);
+      const respuesta = await apiFetch(`/buscar?q=${encodeURIComponent(texto.trim())}`);
       if (!respuesta.ok) throw new Error();
       const lista = await respuesta.json();
       setResultados(lista);

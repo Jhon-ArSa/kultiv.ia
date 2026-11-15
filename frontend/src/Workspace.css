@@ -197,3 +197,137 @@ body { background: #f5f6f1; }
 .chat-data-cards dl > div:last-child { margin-bottom:0; }
 .chat-data-cards dt { font-size:13px; font-weight:600; color:#52685c; }
 .chat-data-cards dd { margin:2px 0 0; color:#173f2b; font-size:16px; overflow-wrap:anywhere; }
+
+/* La decisión del agricultor aparece antes de las herramientas detalladas. */
+.welcome { display:block; padding:clamp(26px,4vw,48px); background:#174a36; }
+.welcome-copy { max-width:760px; }
+.welcome h2 { max-width:700px; font-size:clamp(30px,3.2vw,44px); }
+.welcome-workflow { display:none; }
+.field-summary { margin:24px auto 0; padding:clamp(20px,2.5vw,30px); background:#fff; border:1px solid #dce7dc; border-radius:18px; box-shadow:0 8px 28px #193d320b; }
+.field-summary-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:18px; }
+.field-summary-heading h2 { margin:0; font-size:clamp(22px,2.4vw,29px); }
+.field-summary-heading a { padding:10px 15px; color:#fff; background:#236947; border-radius:9px; font-weight:700; text-decoration:none; }
+.field-summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.field-summary-grid > div { padding:18px; min-width:0; background:#f1f6ed; border-radius:12px; }
+.field-summary-grid span,.field-summary-grid strong,.field-summary-grid small { display:block; }
+.field-summary-grid span { font-size:23px; }
+.field-summary-grid strong { margin-top:8px; color:#214633; }
+.field-summary-grid p { margin:7px 0 4px; font-size:clamp(20px,2vw,26px); font-weight:700; line-height:1.2; color:#173f2d; overflow-wrap:anywhere; }
+.field-summary-grid small,.field-summary-note { color:#52695a; line-height:1.45; }
+.field-summary-note { margin:16px 0 0; font-size:13px; }
+.agro-months button { min-height:110px; }
+.field-map-canvas { height:440px; }
+.dashboard-toolbar { position:sticky; top:0; z-index:1050; display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:12px clamp(18px,3vw,36px); background:#fff; border-bottom:1px solid #dce5de; box-shadow:0 2px 9px #123b2410; }
+.dashboard-toolbar label { display:flex; align-items:center; gap:9px; padding:5px 12px; border:1px solid #d4e0d6; border-radius:10px; background:#f7faf6; font-size:13px; font-weight:700; }
+.dashboard-toolbar select { min-width:160px; max-width:280px; min-height:34px; border:0; background:transparent; color:#16412f; font-weight:700; }
+.dashboard-data-status { margin-left:auto; display:grid; text-align:right; line-height:1.3; }
+.dashboard-data-status strong { font-size:13px; color:#224c37; }.dashboard-data-status small { font-size:11px; color:#637768; }
+.welcome { background:linear-gradient(110deg,#155038 5%,#287b57 60%,#317fa7 100%); }
+.field-summary-grid { grid-template-columns:repeat(5,minmax(0,1fr)); }
+.field-summary-grid > div { border:1px solid #e0e9e1; background:#fff; box-shadow:0 3px 12px #153c2c0b; }
+.clima-anual { margin-top:22px; }.clima-anual .rain-chart { padding:24px 20px; border-radius:16px; background:#183952; color:#fff; }.clima-anual .rain-column strong,.clima-anual .rain-column span { color:#fff; }.clima-anual .rain-fill { background:#f4c653; }
+.gpm-history { margin-top:24px; padding-top:20px; border-top:1px solid #dce5de; }
+.gpm-history button { min-height:44px; padding:9px 16px; border:1px solid #b9d2c0; border-radius:9px; background:#ecf5ec; color:#174b34; font-weight:700; cursor:pointer; }
+.gpm-history button:disabled { opacity:.65; cursor:wait; }
+.gpm-history .table-scroll { max-height:320px; overflow:auto; }
+@media(max-width:1200px) { .field-summary-grid { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:900px) { .dashboard-toolbar { top:67px; }.dashboard-data-status { margin-left:0; text-align:left; } }
+@media(max-width:700px) { .field-summary-grid { grid-template-columns:1fr; }.dashboard-toolbar label { flex:1 1 140px; }.dashboard-toolbar select { min-width:0; width:100%; }.dashboard-data-status { width:100%; } }
+@media(max-width:700px) { .field-summary-grid { grid-template-columns:1fr; }.field-summary-grid > div { display:grid; grid-template-columns:36px 1fr; column-gap:10px; padding:14px; }.field-summary-grid span { grid-row:span 3; }.field-summary-grid strong { margin:0; }.field-summary-grid p { margin:3px 0; }.field-summary-heading { align-items:flex-start; flex-direction:column; }.field-map-canvas { height:340px; } }
+
+/* Navegación por botones: secciones existentes, sin pantallas ni datos simulados. */
+.app { padding-left:254px; }
+.navigation-rail { position:fixed; inset:0 auto 0 0; z-index:1100; width:254px; display:flex; flex-direction:column; background:#164d37; color:#fff; box-shadow:4px 0 20px #102c1d18; }
+.rail-brand { display:flex; align-items:center; gap:12px; padding:25px 20px 21px; border-bottom:1px solid #ffffff30; }
+.rail-brand img { width:48px; height:48px; object-fit:cover; border-radius:12px; }
+.rail-brand strong,.rail-brand small { display:block; }
+.rail-brand strong { font-size:21px; line-height:1.1; }
+.rail-brand small { margin-top:5px; font-size:11px; letter-spacing:.04em; color:#cae1ce; }
+.navigation-rail nav { display:grid; align-content:start; gap:6px; overflow-y:auto; padding:17px 12px 24px; }
+.navigation-rail button { display:flex; align-items:center; gap:12px; width:100%; min-height:52px; padding:10px 13px; text-align:left; background:transparent; border:0; border-left:4px solid transparent; border-radius:10px; color:#f2f7f0; font-size:15px; font-weight:650; cursor:pointer; }
+.navigation-rail button:hover,.navigation-rail button.active { background:#327e59; }
+.navigation-rail button.active { border-left-color:#f4c653; }
+.navigation-rail button:focus-visible { outline:3px solid #f4c653; outline-offset:1px; }
+.rail-icon { flex:none; width:27px; text-align:center; font-size:23px; line-height:1; color:#c8e6b8; }
+.header .brand { display:none; }
+.header .top-nav { display:none; }
+@media(max-width:900px) {
+  .app { padding-left:0; padding-top:67px; }
+  .navigation-rail { inset:0 0 auto 0; width:100%; height:67px; flex-direction:row; align-items:center; }
+  .rail-brand { padding:9px 12px; border:0; }
+  .rail-brand img { width:38px; height:38px; }
+  .rail-brand strong { font-size:16px; }.rail-brand small { display:none; }
+  .navigation-rail nav { display:flex; flex:1; overflow-x:auto; overflow-y:hidden; gap:4px; padding:6px 8px; scrollbar-width:thin; }
+  .navigation-rail button { flex:none; width:auto; min-height:50px; padding:9px 12px; white-space:nowrap; font-size:13px; }
+  .rail-icon { font-size:18px; width:20px; }
+  .header .brand { display:flex; }
+  [id] { scroll-margin-top:78px; }
+}
+
+/* Barra superior con navegación que se ajusta al espacio disponible. */
+.app { padding:0; }
+.navigation-bar { position:sticky; top:0; z-index:1200; width:100%; min-height:74px; display:flex; align-items:center; gap:12px; padding:9px clamp(14px,2vw,32px); background:#153f31; color:#fff; box-shadow:0 4px 18px #102e2226; }
+.nav-brand { display:flex; flex:none; align-items:center; gap:10px; min-width:190px; }
+.nav-brand img { width:48px; height:48px; object-fit:cover; border-radius:12px; background:#fff; }
+.nav-brand strong,.nav-brand small { display:block; }
+.nav-brand strong { font-size:20px; line-height:1.1; }
+.nav-brand small { margin-top:3px; color:#d8e9dc; font-size:11px; }
+.nav-visible { flex:1; min-width:0; display:flex; align-items:center; gap:8px; overflow:hidden; }
+.navigation-bar .nav-button { display:inline-flex; flex:none; align-items:center; gap:7px; min-height:45px; padding:9px 12px; border:0; border-radius:9px; background:transparent; color:#f5fbf6; white-space:nowrap; font:inherit; font-size:14px; font-weight:700; cursor:pointer; }
+.navigation-bar .nav-button:hover,.navigation-bar .nav-button.active { background:#2d7b58; }
+.navigation-bar .nav-button.active { box-shadow:inset 0 -3px #f4c653; }
+.nav-icon { color:#d2e9cc; font-size:19px; line-height:1; }
+.nav-overflow { position:relative; flex:none; }
+.nav-menu-toggle { display:flex; align-items:center; gap:7px; min-height:44px; padding:8px 12px; border:1px solid #9bc4a990; border-radius:9px; background:#235d42; color:#fff; font:inherit; font-weight:700; cursor:pointer; }
+.nav-menu-toggle span:first-child { font-size:21px; line-height:1; }
+.nav-menu { position:absolute; top:calc(100% + 10px); right:0; width:min(320px,calc(100vw - 24px)); max-height:70vh; display:grid; gap:3px; overflow:auto; padding:9px; border:1px solid #d8e6da; border-radius:12px; background:#174c37; box-shadow:0 12px 36px #08281d50; }
+.nav-menu .nav-button { width:100%; justify-content:flex-start; text-align:left; }
+.nav-language { display:flex; flex:none; align-items:center; gap:4px; color:#fff; }
+.nav-language select { max-width:100px; min-height:42px; padding:7px 4px; border:1px solid #a7c7b2; border-radius:8px; background:#f7fbf7; color:#16422e; font:inherit; font-weight:700; }
+.nav-measure { position:fixed; top:-9999px; left:-9999px; display:flex; width:max-content; visibility:hidden; pointer-events:none; }
+.navigation-bar button:focus-visible,.nav-language select:focus-visible { outline:3px solid #f4c653; outline-offset:2px; }
+.dashboard-toolbar { top:74px; }
+[id] { scroll-margin-top:138px; }
+@media(max-width:900px) { .app { padding:0; }.navigation-bar { height:auto; min-height:68px; }.dashboard-toolbar { top:68px; } }
+@media(max-width:600px) { .nav-brand { min-width:0; }.nav-brand img { width:40px; height:40px; }.nav-brand strong { font-size:16px; }.nav-brand small { display:none; }.nav-menu-toggle span:last-child { display:none; }.nav-language select { max-width:75px; }.navigation-bar { gap:7px; padding:8px 10px; } }
+
+.app { position:relative; isolation:isolate; background:transparent; }
+.dashboard-video { position:fixed; inset:0; width:100%; height:100%; object-fit:cover; z-index:-2; }
+.app::before { content:""; position:fixed; inset:0; z-index:-1; background:#f3f7f19c; pointer-events:none; }
+.welcome { position:relative; isolation:isolate; overflow:hidden; background:transparent; }
+.welcome::before { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(100deg,#082b20b5 4%,#125239ad 55%,#133d5488 100%); }
+.welcome-copy,.welcome-workflow { position:relative; }
+@media(prefers-reduced-motion:reduce) { .dashboard-video { display:none; } }
+.dashboard-load-error { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 18px; padding:13px 16px; border:1px solid #e9c9bd; border-radius:10px; background:#fff4ef; color:#813f2b; }
+.dashboard-load-error button { min-height:40px; padding:8px 13px; border:1px solid #ae715c; border-radius:8px; background:#fff; color:#813f2b; font:inherit; font-weight:700; cursor:pointer; }
+
+/* Cada opción de navegación muestra una página propia. */
+.app:not([data-page="contenido-principal"]) > .welcome,
+.app:not([data-page="contenido-principal"]) > .guide-section { display:none; }
+.app[data-page="contenido-principal"] main > :not(.field-summary) { display:none; }
+.app[data-page="clima-anual"] main > :not(.clima-anual) { display:none; }
+.app[data-page="mapa-campo"] main > :not(.workspace-heading):not(.layout) { display:none; }
+.app[data-page="mapa-campo"] main > .layout + .workspace-heading { display:none; }
+.app[data-page="calendario-agricola"] main > :not(.workspace-heading):not(.calendario-agricola) { display:none; }
+.app[data-page="calendario-agricola"] main > .workspace-heading:not(:has(+ .calendario-agricola)) { display:none; }
+.app[data-page="rotacion"] main > :not(.rotacion) { display:none; }
+.app[data-page="siembras"] main > :not(.sowing) { display:none; }
+.app[data-page="clima"] main > :not(.layout) { display:none; }
+.app[data-page="clima"] .field-map { display:none; }
+.app[data-page="clima"] .layout { grid-template-columns:minmax(0,1fr); }
+.app[data-page="asistente"] main > :not(.assistant-page-intro):not(.asistente) { display:none; }
+.app[data-page="llamadas"] main > :not(.calls-page) { display:none; }
+.assistant-page-intro { display:none; }
+.app[data-page="asistente"] .assistant-page-intro { display:block; max-width:900px; margin:42px auto 20px; padding:28px; border-radius:16px; background:white; }
+.team-page { display:none; max-width:1300px; margin:42px auto; padding:clamp(20px,4vw,48px); }
+.app[data-page="equipo"] main,.app[data-page="equipo"] > .welcome,.app[data-page="equipo"] > .guide-section { display:none; }
+.app[data-page="equipo"] .team-page { display:block; }
+.team-page > h1 { margin:5px 0 10px; color:#17432f; font-size:clamp(30px,4vw,44px); }
+.team-page > p:not(.eyebrow) { color:#53695c; font-size:18px; }
+.team-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; margin-top:30px; }
+.team-card { overflow:hidden; padding:0 0 18px; border:1px solid #dce6dc; border-radius:16px; background:#fff; box-shadow:0 8px 24px #173c2b12; }
+.team-card img { display:block; width:100%; aspect-ratio:4/3; object-fit:cover; object-position:center 30%; background:#edf3eb; }
+.team-card h2 { margin:17px 17px 8px; color:#17432f; font-size:19px; }
+.team-card p { margin:0 17px; color:#53695c; line-height:1.5; }
+.app:not([data-page="contenido-principal"]) .app-footer span { display:none; }
+.app-footer button { border:0; background:transparent; color:#256745; font:inherit; font-weight:700; cursor:pointer; }

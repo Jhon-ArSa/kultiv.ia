@@ -1,6 +1,6 @@
+import { apiFetch } from './api';
 import { useTranslation } from "./i18n";
 import React, { useEffect, useRef, useState } from 'react';
-const API = process.env.REACT_APP_API_URL || '/api';
 const textos = {
   es: {
     eyebrow: 'PLANIFICA TU CHACRA',
@@ -121,7 +121,7 @@ export default function Rotacion({
     setErrorIA('');
     setPropuesta(null);
     try {
-      const r = await fetch(`${API}/rotacion`, {
+      const r = await apiFetch('/rotacion',  {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

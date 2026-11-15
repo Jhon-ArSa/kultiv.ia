@@ -1,6 +1,6 @@
+import { apiFetch } from './api';
 import { useTranslation } from "./i18n";
 import React, { useEffect, useState } from 'react';
-const API = process.env.REACT_APP_API_URL || '/api';
 const fechaPeru = () => new Intl.DateTimeFormat('en-CA', {
   timeZone: 'America/Lima',
   year: 'numeric',
@@ -29,7 +29,7 @@ export default function Calendario({
     setSeleccion(null);
     setError('');
     setCargando(true);
-    fetch(`${API}/pronostico/${encodeURIComponent(distrito)}`, {
+    apiFetch(`/pronostico/${encodeURIComponent(distrito)}`,  {
       signal: control.signal
     }).then(async r => {
       const body = await r.json();

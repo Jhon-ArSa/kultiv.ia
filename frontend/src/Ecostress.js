@@ -1,5 +1,5 @@
+import { apiFetch } from './api';
 import React, { useEffect, useState } from 'react';
-const API = process.env.REACT_APP_API_URL || '/api';
 const fecha = valor => new Date(valor).toLocaleString('es-PE', { timeZone: 'America/Lima', dateStyle: 'long', timeStyle: 'short' });
 export default function Ecostress({ distrito, nombreLugar, datos }) {
   const [resultado, setResultado] = useState(null);
@@ -7,7 +7,7 @@ export default function Ecostress({ distrito, nombreLugar, datos }) {
   const [intento, setIntento] = useState(0);
   useEffect(() => {
     const control = new AbortController(); setResultado(null); setEstado('Buscando información de la NASA…');
-    fetch(`${API}/ecostress/${encodeURIComponent(distrito)}`, { signal: control.signal })
+    apiFetch(`/ecostress/${encodeURIComponent(distrito)}`,  { signal: control.signal })
       .then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.detail); return d; })
       .then(d => { setResultado(d); setEstado(''); })
       .catch(e => { if (e.name !== 'AbortError') setEstado(e.message || 'No se pudo consultar ECOSTRESS.'); });

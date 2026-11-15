@@ -1,3 +1,4 @@
+import { apiFetch } from './api';
 import { useTranslation } from "./i18n";
 import React, { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -5,12 +6,12 @@ import remarkGfm from 'remark-gfm';
 import ChatTable from './ChatTable';
 import { referencias, regiones } from './zonas';
 import { cultivos } from './Siembras';
-const API = process.env.REACT_APP_API_URL || '/api';
 export default function Asistente({
   distrito,
   nombreLugar,
   mes,
   datos,
+  indicadores,
   idioma
 }) {
   const {
@@ -97,13 +98,20 @@ export default function Asistente({
         temperatura_media_c: datos.temperatura,
         minima_c: datos.temperatura_minima,
         lluvia_mm: datos.precipitacion,
-        humedad_relativa_aire_porcentaje: datos.humedad_relativa
+        humedad_relativa_aire_porcentaje: datos.humedad_relativa,
+        radiacion_solar_mj_m2_dia: datos.radiacion_solar_mj_m2_dia ?? null,
+        radiacion_solar_fecha: datos.radiacion_solar_fecha ?? null
+      } : null,
+      indicadores_power_regionales: indicadores ? {
+        fecha: indicadores.fecha,
+        humedad_modelada_zona_raices_indice_0_a_1: indicadores.humedad_zona_raices,
+        evaporacion_terrestre_mm_dia: indicadores.evaporacion_terrestre_mm
       } : null,
       ecostress: 'Se buscan escenas, pero no se han extraído ni validado valores ESI o PET.',
       avisos_senamhi: 'No se consultan automáticamente; disponibles mediante enlaces oficiales.'
     };
     try {
-      const r = await fetch(`${API}/chat`, {
+      const r = await apiFetch('/chat',  {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -139,6 +147,6 @@ export default function Asistente({
   return <aside className="chat-float" id="asistente"><button className="chat-toggle" type="button" aria-expanded={abierto} aria-controls="ventana-asistente" onClick={() => setAbierto(!abierto)}>{tr(!abierto && <img className="chat-avatar" src={`${process.env.PUBLIC_URL}/logo-02.jpeg`} alt={tr("")} />)}{tr(abierto ? '✕ Cerrar' : 'Pregúntame')}</button>{tr(abierto && <section className="assistant chat-window" id="ventana-asistente" aria-label={tr("Asistente agrícola")}><header className="chat-header"><img className="chat-avatar" src={`${process.env.PUBLIC_URL}/logo-02.jpeg`} alt={tr("")} /><div><strong>{tr("Tu asistente agrícola")}</strong><span>{tr("Zona: ")}{tr(nombreLugar)}</span></div></header><div className="chat-body"><div className="assistant-messages" aria-live="polite"><div className="assistant-bubble">{tr("Hola. Puedo ayudarte a revisar siembras, clima y rotación. Elige una pregunta o escríbeme con tus propias palabras.")}</div>{tr(mensajes.map((m, i) => <div key={i} className={m.role === 'user' ? 'assistant-question' : 'assistant-bubble'}>{tr(m.role === 'assistant' ? <div className="chat-markdown"><ReactMarkdown remarkPlugins={[remarkGfm]} components={{ table: ChatTable }}>{m.content}</ReactMarkdown></div> : m.content)}</div>))}{tr(cargando && <div className="assistant-bubble" role="status">{tr("Consultando la información…")}</div>)}<div ref={finalMensajes} /></div><div className="assistant-suggestions"><button type="button" disabled={cargando} onClick={() => enviar(tr('¿Qué puedo sembrar en mi zona?'))}>{tr("¿Qué puedo sembrar?")}</button><button type="button" disabled={cargando} onClick={() => enviar(tr('¿Va a llover en mi zona?'))}>{tr("¿Va a llover?")}</button><button type="button" disabled={cargando} onClick={() => enviar(tr('¿Cómo puedo organizar la rotación de mis cultivos?'))}>{tr("Mi rotación")}</button><button type="button" disabled={cargando} onClick={() => enviar(tr('¿Qué debo revisar antes de cosechar?'))}>{tr("Antes de cosechar")}</button></div><form className="assistant-form" onSubmit={e => {
           e.preventDefault();
           enviar(entrada);
-        }}><label className="visually-hidden" htmlFor="consulta-asistente">{tr("Escribe tu pregunta")}</label><input id="consulta-asistente" value={entrada} disabled={cargando} maxLength={500} onChange={e => setEntrada(e.target.value)} placeholder={tr("Escribe tu pregunta…")} /><button className="primary-action" type="submit" disabled={cargando || !entrada.trim()}>{tr("Enviar")}</button></form>{tr(error && <p className="error" role="alert">{tr(error)}{tr(" Puedes intentar de nuevo.")}</p>)}<p className="assistant-note">{tr("Al preguntar, se envían a Groq tu pregunta, historial reciente, zona, clima y plan de rotación guardado para esa zona. No se envía la dirección guardada ni las coordenadas GPS. Evita incluir datos personales. La IA puede equivocarse.")}</p><p className="assistant-note"><a href="https://www.gob.pe/100546-consultar-el-clima-y-avisos-meteorologicos-con-la-aplicacion-senamhi-peru-movil" target="_blank" rel="noreferrer">{tr("Consultar pronóstico oficial SENAMHI ↗")}</a> · <a href="https://www.gob.pe/9945-pronosticos-agrometeorologicos-del-senamhi" target="_blank" rel="noreferrer">{tr("Boletines agrícolas ↗")}</a></p></div></section>)}</aside>;
+        }}><label className="visually-hidden" htmlFor="consulta-asistente">{tr("Escribe tu pregunta")}</label><input id="consulta-asistente" value={entrada} disabled={cargando} maxLength={500} onChange={e => setEntrada(e.target.value)} placeholder={tr("Escribe tu pregunta…")} /><button className="primary-action" type="submit" disabled={cargando || !entrada.trim()}>{tr("Enviar")}</button></form>{tr(error && <p className="error" role="alert">{tr(error)}{!error.includes('GROQ_API_KEY') && tr(" Puedes intentar de nuevo.")}</p>)}<p className="assistant-note">{tr("Al preguntar, se envían a Groq tu pregunta, historial reciente, zona, clima y plan de rotación guardado para esa zona. No se envía la dirección guardada ni las coordenadas GPS. Evita incluir datos personales. La IA puede equivocarse.")}</p><p className="assistant-note"><a href="https://www.gob.pe/100546-consultar-el-clima-y-avisos-meteorologicos-con-la-aplicacion-senamhi-peru-movil" target="_blank" rel="noreferrer">{tr("Consultar pronóstico oficial SENAMHI ↗")}</a> · <a href="https://www.gob.pe/9945-pronosticos-agrometeorologicos-del-senamhi" target="_blank" rel="noreferrer">{tr("Boletines agrícolas ↗")}</a></p></div></section>)}</aside>;
 }
 

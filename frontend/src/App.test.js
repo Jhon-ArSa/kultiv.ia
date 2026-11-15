@@ -3,6 +3,8 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import App from './App';
 import Asistente from './Asistente';
 import ChatTable from './ChatTable';
+import ClimaAnual from './ClimaAnual';
+import NavigationRail from './NavigationRail';
 import { LanguageProvider, useLanguage, translate } from './i18n';
 import en from './locales/en.json';
 import source from './locales/source.json';
@@ -26,11 +28,57 @@ const weatherFetch = url => {
   return ok({distrito:'Huancayo',color:'verde',fecha:'2026-11-10',temperatura:12,temperatura_minima:5,precipitacion:2,humedad_relativa:60});
 };
 
+test('moves navigation links into the menu when the top bar is narrow', () => {
+  jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(360);
+  jest.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(120);
+  jest.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 100, height: 44, x: 0, y: 0, top: 0, left: 0, right: 100, bottom: 44 });
+  render(<LanguageProvider><NavigationRail /></LanguageProvider>);
+  const menu = screen.getByRole('button', { name: 'Más secciones' });
+  expect(menu).toHaveAttribute('aria-expanded', 'false');
+  fireEvent.click(menu);
+  expect(menu).toHaveAttribute('aria-expanded', 'true');
+  expect(screen.getByRole('navigation', { name: 'Más secciones' })).toHaveTextContent('Calendario agrícola');
+});
+
+test('dashboard shows published NASA values with separate solar date', async () => {
+  jest.useFakeTimers();
+  global.fetch = jest.fn(url => {
+    if (url.includes('/semaforo/')) return ok({ distrito: 'Huancayo', color: 'verde', fecha: '2026-11-12', temperatura: 10.49, temperatura_minima: 7.4, precipitacion: 12.9, humedad_relativa: 84.95, radiacion_solar_mj_m2_dia: 21.32, radiacion_solar_fecha: '2026-11-10' });
+    if (url.includes('/indicadores-agricolas/')) return ok({ ubicacion: 'Huancayo', fecha: '2026-11-12', humedad_zona_raices: 0.68, evaporacion_terrestre_mm: 2.15 });
+    return weatherFetch(url);
+  });
+  render(<LanguageProvider><App /></LanguageProvider>);
+  await act(async () => { jest.advanceTimersByTime(4000); });
+  expect(await screen.findByText('NASA POWER · 2026-11-10')).toBeInTheDocument();
+  expect(screen.getByText('0.68 / 1')).toBeInTheDocument();
+  expect(screen.queryByText('No disponible')).not.toBeInTheDocument();
+});
+
+test('shows GPM rainfall only for complete months and identifies its source', async () => {
+  global.fetch = jest.fn(url => url.includes('/lluvia-gpm-anual')
+    ? ok({ ubicacion: 'Huancayo', ano: 2025, meses: [
+      { mes: 1, lluvia_total_mm: 64.9, dias_validos: 31, dias_mes: 31 },
+      { mes: 2, lluvia_total_mm: null, dias_validos: 25, dias_mes: 28 }
+    ] })
+    : ok({ ano: 2025, meses: Array.from({ length: 12 }, (_, i) => ({ mes: i + 1, temperatura_c: 14, minima_media_c: 4, lluvia_mm_dia: 2 })) }));
+  render(<LanguageProvider><ClimaAnual distrito="Huancayo" nombreLugar="Huancayo" /></LanguageProvider>);
+  fireEvent.click(screen.getByRole('button', { name: 'Ver lluvia satelital GPM' }));
+  expect(await screen.findByText(/NASA GPM IMERG · 2025/)).toBeInTheDocument();
+  expect(screen.getByText(/64[.,]9/)).toBeInTheDocument();
+  expect(screen.getByText('Sin mes completo')).toBeInTheDocument();
+});
+
 test('switches the whole application and keeps canonical crop/location values', async () => {
   global.fetch=jest.fn(weatherFetch);
   jest.useFakeTimers();
   render(<LanguageProvider><App /></LanguageProvider>);
   await act(async()=>{jest.advanceTimersByTime(4000);});
+  const scroll=jest.fn();
+  window.HTMLElement.prototype.scrollIntoView=scroll;
+  const calendarButton=screen.getByRole('button',{name:/Calendario agrícola/});
+  fireEvent.click(calendarButton);
+  expect(calendarButton).toHaveAttribute('aria-current','page');
+  expect(scroll).toHaveBeenCalled();
   const selector=screen.getByRole('combobox',{name:/Idioma/});
   fireEvent.change(selector,{target:{value:'en'}});
   expect(await screen.findByText(translate('Busca tu zona y mira el mapa','en'))).toBeInTheDocument();

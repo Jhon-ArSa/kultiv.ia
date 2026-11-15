@@ -1,12 +1,12 @@
+import { apiFetch } from './api';
 import React, { useEffect, useState } from 'react';
-const API = process.env.REACT_APP_API_URL || '/api';
 export default function AguaPlagas({ distrito, nombreLugar }) {
   const [datos, setDatos] = useState(null);
   const [estado, setEstado] = useState('');
   const [intento, setIntento] = useState(0);
   useEffect(() => {
     const control = new AbortController(); setDatos(null); setEstado('Consultando datos de la NASA…');
-    fetch(`${API}/indicadores-agricolas/${encodeURIComponent(distrito)}`, { signal: control.signal })
+    apiFetch(`/indicadores-agricolas/${encodeURIComponent(distrito)}`,  { signal: control.signal })
       .then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.detail); return d; })
       .then(d => { setDatos(d); setEstado(''); })
       .catch(e => { if (e.name !== 'AbortError') setEstado(e.message || 'No se pudo conectar con el servidor.'); });
