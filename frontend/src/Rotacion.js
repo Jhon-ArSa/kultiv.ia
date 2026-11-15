@@ -1,6 +1,6 @@
 import { useTranslation } from "./i18n";
 import React, { useEffect, useRef, useState } from 'react';
-const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API = process.env.REACT_APP_API_URL || '/api';
 const textos = {
   es: {
     eyebrow: 'PLANIFICA TU CHACRA',
@@ -173,3 +173,4 @@ export default function Rotacion({
     <button className="primary-action" type="button" onClick={guardar}>{tr(t.save)}</button> <span role="status">{tr(mensaje)}</span><p className="source">{tr(t.local)} <a href="https://www.fao.org/4/a0218e/A0218E16.htm" target="_blank" rel="noreferrer">{tr(t.source)} ↗</a></p>
   </section>;
 }
+

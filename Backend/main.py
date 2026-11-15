@@ -31,7 +31,7 @@ LUGARES = {
 }
 PARAMETROS = ("T2M", "T2M_MIN", "PRECTOTCORR", "RH2M")
 NASA_URL = "https://power.larc.nasa.gov/api/temporal/daily/point"
-UBICACIONES = json.loads((Path(__file__).resolve().parent.parent / "data" / "ubicaciones.json").read_text(encoding="utf-8"))
+UBICACIONES = json.loads((Path(__file__).resolve().parent / "data" / "ubicaciones.json").read_text(encoding="utf-8"))
 POR_ID = {item["id"]: item for item in UBICACIONES}
 
 
@@ -424,3 +424,8 @@ def chat(consulta: ConsultaChat):
         raise HTTPException(status_code=502, detail="Groq no pudo responder. Inténtalo de nuevo.") from exc
     except (URLError, TimeoutError, OSError, ValueError, KeyError, IndexError, TypeError) as exc:
         raise HTTPException(status_code=503, detail="No se pudo conectar con el asistente. Inténtalo de nuevo.") from exc
+
+
+# Vercel forwards the original /api path to this ASGI entrypoint.
+vercel_app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+vercel_app.mount("/api", app)

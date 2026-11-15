@@ -1,6 +1,6 @@
 import { useTranslation } from "./i18n";
 import React, { useEffect, useState } from 'react';
-const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API = process.env.REACT_APP_API_URL || '/api';
 const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 export default function ClimaAnual({
   distrito,
@@ -34,3 +34,4 @@ export default function ClimaAnual({
             }} /></div><strong>{tr(meses[m.mes - 1])}</strong></div>))}</div><p>{tr("Las barras muestran milímetros de lluvia por día, en promedio para cada mes. No son lluvia acumulada ni pronóstico.")}</p><details><summary>{tr("Ver todos los valores de lluvia y temperatura")}</summary><div className="table-scroll"><table><thead><tr><th>{tr("Mes")}</th><th>{tr("Lluvia media (mm/día)")}</th><th>{tr("Temperatura media (°C)")}</th></tr></thead><tbody>{tr(datos.meses.map(m => <tr key={m.mes}><th>{tr(meses[m.mes - 1])}</th><td>{tr(m.lluvia_mm_dia ?? 'Sin datos')}</td><td>{tr(m.temperatura_c ?? 'Sin datos')}</td></tr>))}</tbody></table></div></details></>)}
     <p className="source">{tr("Fuente: NASA POWER, promedio mensual para una celda regional. No permite diagnosticar sequía en tu parcela. Para previsiones y alertas consulta ")}<a href="https://www.gob.pe/100546-consultar-el-clima-y-avisos-meteorologicos-con-la-aplicacion-senamhi-peru-movil" target="_blank" rel="noreferrer">{tr("SENAMHI")}</a>.</p></section>;
 }
+

@@ -12,7 +12,7 @@ import Rotacion from './Rotacion';
 import ClimaAnual from './ClimaAnual';
 import MapaCampo from './MapaCampo';
 import './Workspace.css';
-const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API = process.env.REACT_APP_API_URL || '/api';
 const formato = (valor, unidad) => `${Number(valor).toLocaleString('es-PE', {
   maximumFractionDigits: 1
 })} ${unidad}`;
@@ -222,3 +222,4 @@ export default function App() {
   if (!bienvenida) return <Aplicacion />;
   return <main className="welcome-main-screen"><div className="welcome-main-content"><img className="welcome-main-logo" src={`${process.env.PUBLIC_URL}/logo-02.jpeg`} alt={tr("Logo kultiv.IA")} /><h1>{tr("¡Bienvenido a kultiv.IA!")}</h1><p role="status">{tr("Entrando a la aplicación…")}</p><video className="welcome-main-video" src={`${process.env.PUBLIC_URL}/mascota.webm`} autoPlay loop muted playsInline aria-hidden="true" /></div></main>;
 }
+

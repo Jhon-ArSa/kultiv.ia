@@ -1,6 +1,6 @@
 import { useTranslation } from "./i18n";
 import React, { useEffect, useState } from 'react';
-const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API = process.env.REACT_APP_API_URL || '/api';
 const fechaPeru = () => new Intl.DateTimeFormat('en-CA', {
   timeZone: 'America/Lima',
   year: 'numeric',
@@ -93,3 +93,4 @@ export default function Calendario({
     </div></div>
   </section>;
 }
+

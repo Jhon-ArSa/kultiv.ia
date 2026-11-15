@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API = process.env.REACT_APP_API_URL || '/api';
 const fecha = valor => new Date(valor).toLocaleString('es-PE', { timeZone: 'America/Lima', dateStyle: 'long', timeStyle: 'short' });
 export default function Ecostress({ distrito, nombreLugar, datos }) {
   const [resultado, setResultado] = useState(null);
@@ -23,3 +23,4 @@ export default function Ecostress({ distrito, nombreLugar, datos }) {
     <article className="forecast-card"><h3>🌦️ ¿Cómo estuvo el clima ese día?</h3>{ultima && (power ? <><p>NASA POWER estima que el <strong>{power.fecha}</strong>, día de la imagen más reciente, hubo:</p><div className="metrics"><div><span>Temperatura media</span><strong>{power.temperatura} °C</strong></div><div><span>Temperatura mínima</span><strong>{power.minima} °C</strong></div><div><span>Lluvia durante el día</span><strong>{power.lluvia} mm</strong></div><div><span>Humedad del aire</span><strong>{power.humedad} %</strong></div></div></> : <p>No hay datos completos de POWER para el día de la imagen más reciente.</p>)}{!ultima && <p>Si encontramos una imagen, aquí podrás comparar la fecha con el clima de ese día.</p>}{datos && <p>El último dato diario de lluvia disponible es del {datos.fecha}: {datos.precipitacion} mm.</p>}<p className="source">Son estimaciones de una zona amplia, no mediciones de tu parcela. La humedad indicada es del aire, no del suelo. Esta comparación no mide estrés del cultivo.</p><a href="https://doi.org/10.5067/ECOSTRESS/ECO_L4G_ESI.002" target="_blank" rel="noreferrer">Conocer la fuente ECOSTRESS ↗</a></article></div>
   </section>;
 }
+

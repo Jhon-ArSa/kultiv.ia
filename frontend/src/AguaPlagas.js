@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API = process.env.REACT_APP_API_URL || '/api';
 export default function AguaPlagas({ distrito, nombreLugar }) {
   const [datos, setDatos] = useState(null);
   const [estado, setEstado] = useState('');
@@ -20,3 +20,4 @@ export default function AguaPlagas({ distrito, nombreLugar }) {
     <p className="source">Fuente: NASA POWER (GWETROOT, EVLAND y variables meteorológicas). Datos modelados para una celda regional y publicados con retraso. <a href="https://power.larc.nasa.gov/docs/methodology/data/sources_hydrology/" target="_blank" rel="noreferrer">Conoce los indicadores ↗</a></p>
   </section>;
 }
+

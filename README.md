@@ -11,7 +11,7 @@ En una terminal, desde la raíz del proyecto:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python -m pip install -r Backend/requirements.txt
-.\.venv\Scripts\python -m uvicorn Backend.main:app --port 8000
+.\.venv\Scripts\python -m uvicorn Backend.main:vercel_app --port 8000
 ```
 
 En otra terminal:
@@ -22,7 +22,7 @@ npm install
 npm start
 ```
 
-Abre http://localhost:3000. El backend necesita acceso a internet para consultar NASA POWER. Por defecto el frontend usa `http://127.0.0.1:8000`; se puede cambiar con `REACT_APP_API_URL` antes de iniciarlo. Los puntos son ubicaciones aproximadas. Los resultados se conservan en memoria durante el día UTC; si NASA no responde, la aplicación muestra un error sin sustituirlos por datos simulados.
+Abre http://localhost:3000. El backend necesita acceso a internet para consultar NASA POWER. El frontend llama a `/api` en el mismo origen; durante `npm start`, el proxy de Create React App envía estas solicitudes a `127.0.0.1:8000`. La URL puede cambiarse con `REACT_APP_API_URL` antes de compilar. Los puntos son ubicaciones aproximadas. Los resultados se conservan en memoria durante el día UTC; si NASA no responde, la aplicación muestra un error sin sustituirlos por datos simulados.
 
 Fuente y metodología: [NASA POWER Daily API](https://power.larc.nasa.gov/docs/services/api/temporal/daily/).
 
@@ -41,7 +41,7 @@ La sección ECOSTRESS consulta NASA CMR para buscar escenas de `ECO_L4G_ESI.002`
 Edita el archivo `.env` de la raíz del proyecto y coloca tu clave después de `GROQ_API_KEY=`. Si no existe, copia `.env.example` como `.env`. Opcionalmente puedes cambiar `GROQ_MODEL`. El archivo `.env` está excluido de Git. Reinicia el backend después de modificarlo:
 
 ```powershell
-.\.venv\Scripts\python -m uvicorn Backend.main:app --port 8000
+.\.venv\Scripts\python -m uvicorn Backend.main:vercel_app --port 8000
 ```
 
 La clave permanece en el backend; nunca se debe incluir en el frontend ni compartirla por chat. Una variable de entorno ya existente tiene prioridad sobre el archivo. El asistente envía a Groq la pregunta, el historial reciente, la zona seleccionada, los datos climáticos disponibles y el plan de rotación guardado para esa zona. No envía coordenadas GPS. El servidor incorpora el pronóstico de wttr.in cuando está disponible. Esas respuestas pueden contener errores y no sustituyen el asesoramiento local. Esta configuración es para desarrollo local: antes de exponer el backend públicamente se requieren autenticación, restricciones de CORS y límites de uso.

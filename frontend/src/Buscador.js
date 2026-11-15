@@ -1,6 +1,6 @@
 import { useTranslation } from "./i18n";
 import React, { useState } from 'react';
-const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API = process.env.REACT_APP_API_URL || '/api';
 export default function Buscador({
   seleccionar
 }) {
@@ -34,3 +34,4 @@ export default function Buscador({
           setEstado('Ubicación seleccionada.');
         }}>{tr(u.nombre)} <small>{tr(u.tipo)} · {tr(u.distrito)}, {tr(u.provincia)}, {tr(u.region)} · {tr(u.id.slice(1))}</small></button></li>))}</ul>)}<p className="search-hint">{tr("Catálogo basado en INEI: ")}<a href="https://github.com/jmcastagnetto/ubigeo-peru-aumentado" target="_blank" rel="noreferrer">{tr("ubigeo-peru-aumentado")}</a>{tr(". Puede no incluir comunidades recientes o sin coordenadas.")}</p></div>;
 }
+

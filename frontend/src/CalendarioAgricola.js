@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { referencias, regiones } from './zonas';
 import { cultivos } from './Siembras';
 const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API = process.env.REACT_APP_API_URL || '/api';
 const mostrar = (valor, unidad) => typeof valor === 'number' && Number.isFinite(valor) ? `${valor.toLocaleString('es-PE', {
   maximumFractionDigits: 1
 })} ${unidad}` : 'No disponible';
@@ -72,3 +72,4 @@ export default function CalendarioAgricola({
     <div className="agro-detail" aria-live="polite"><p className="eyebrow">{tr(meses[mes].toUpperCase())} · {tr(cultivo.toUpperCase())}</p><h3>{tr(referencia ? 'Hay una referencia de siembra para tu región' : 'Aún no tenemos una referencia de siembra para este mes')}</h3><p>{tr(ficha.periodo)}</p><p><strong>{tr("Qué revisar:")}</strong> {tr(ficha.factores)}</p><p><strong>{tr("Riesgos:")}</strong> {tr(ficha.riesgos)}</p><p><strong>{tr("¿Ya está listo para cosechar?")}</strong>{tr(" Este calendario ayuda a planificar siembras, pero no puede determinar la madurez del cultivo. Revisa la fecha de siembra, la variedad y el estado real de la planta con un técnico local.")}</p><p>{tr("La guía no dispone de fechas verificadas de crecimiento o cosecha para esta parcela. Una referencia regional no garantiza que sea el momento adecuado: confirma la variedad, lluvias, suelo y altitud con un técnico local.")}</p><a href="https://www.senamhi.gob.pe/load/file/04501SENA-119.pdf" target="_blank" rel="noreferrer">{tr("Consultar boletín de referencia SENAMHI ↗")}</a></div>
   </section>;
 }
+

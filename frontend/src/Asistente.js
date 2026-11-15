@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 import ChatTable from './ChatTable';
 import { referencias, regiones } from './zonas';
 import { cultivos } from './Siembras';
-const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API = process.env.REACT_APP_API_URL || '/api';
 export default function Asistente({
   distrito,
   nombreLugar,
@@ -141,3 +141,4 @@ export default function Asistente({
           enviar(entrada);
         }}><label className="visually-hidden" htmlFor="consulta-asistente">{tr("Escribe tu pregunta")}</label><input id="consulta-asistente" value={entrada} disabled={cargando} maxLength={500} onChange={e => setEntrada(e.target.value)} placeholder={tr("Escribe tu pregunta…")} /><button className="primary-action" type="submit" disabled={cargando || !entrada.trim()}>{tr("Enviar")}</button></form>{tr(error && <p className="error" role="alert">{tr(error)}{tr(" Puedes intentar de nuevo.")}</p>)}<p className="assistant-note">{tr("Al preguntar, se envían a Groq tu pregunta, historial reciente, zona, clima y plan de rotación guardado para esa zona. No se envía la dirección guardada ni las coordenadas GPS. Evita incluir datos personales. La IA puede equivocarse.")}</p><p className="assistant-note"><a href="https://www.gob.pe/100546-consultar-el-clima-y-avisos-meteorologicos-con-la-aplicacion-senamhi-peru-movil" target="_blank" rel="noreferrer">{tr("Consultar pronóstico oficial SENAMHI ↗")}</a> · <a href="https://www.gob.pe/9945-pronosticos-agrometeorologicos-del-senamhi" target="_blank" rel="noreferrer">{tr("Boletines agrícolas ↗")}</a></p></div></section>)}</aside>;
 }
+
