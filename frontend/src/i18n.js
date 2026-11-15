@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import en from './locales/en.json';
+import enExtra from './locales/en-extra.json';
 import qu from './locales/qu.json';
 
 const LanguageContext = createContext(null);
 // The Quechua catalog is partial and requires review by local Wanka speakers.
-const catalogs = { en, qu };
+const catalogs = { en: { ...en, ...enExtra }, qu };
 const normalize = value => value.replace(/\s+/g, ' ').trim();
 const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const indexes = Object.fromEntries(Object.entries(catalogs).map(([language, catalog]) => [language, {

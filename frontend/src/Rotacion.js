@@ -156,7 +156,7 @@ export default function Rotacion({
     <div className="rotation-generate"><button className="primary-action" type="button" disabled={generando} onClick={generar}>{tr(generando ? 'Consultando datos y preparando propuesta…' : 'Generar rotación para mi zona →')}</button><p>{tr("Al generar, se envían a Groq la zona y los datos regionales de NASA POWER. No se envían las coordenadas GPS.")}</p></div>
     {tr(errorIA && <p className="space-warning" role="alert">{tr(errorIA)}</p>)}
     <div className="rotation-intro rotation-step"><div><span className="rotation-number">02</span><div><strong>{tr("Revisa tu plan de cuatro campañas")}</strong><p>{tr("Puedes cambiar cualquier cultivo antes de guardar el plan.")}</p></div></div></div>
-    <div className="rotation-grid">{tr(plan.map((id, i) => <label className="rotation-card" key={i}><strong>{tr(t.season)} {tr(i + 1)}{tr(Number(anoInicio) >= 2000 && Number(anoInicio) <= 2097 ? ` · ${Number(anoInicio) + i}` : '')}</strong><select value={id} onChange={e => {
+    <div className="rotation-grid">{tr(plan.map((id, i) => <label className="rotation-card" key={i}><strong>{tr(t.season)} {tr(i + 1)}</strong><select value={id} onChange={e => {
           invalidar();
           const copia = [...plan];
           copia[i] = e.target.value;

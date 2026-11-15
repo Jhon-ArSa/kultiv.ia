@@ -301,15 +301,74 @@ def consultar_serie_anual(latitud, longitud, ano):
              "lluvia_mm_dia": valor("PRECTOTCORR", f"{ano}{i:02d}")} for i in range(1, 13)]
 
 
-@app.get("/clima-anual/{distrito}")
-def clima_anual(distrito: str):
+@lru_cache(maxsize=128)
+def referencia_mensual(latitud, longitud, ano_actual):
+    """Promedio del mismo mes en los cinco años completos anteriores."""
+    inicio, fin = ano_actual - 5, ano_actual - 1
+    params = urlencode({"parameters": "PRECTOTCORR,T2M", "community": "AG", "longitude": longitud,
+                        "latitude": latitud, "start": inicio, "end": fin, "format": "JSON"})
+    with abrir_nasa(f"https://power.larc.nasa.gov/api/temporal/monthly/point?{params}", timeout=18) as respuesta:
+        payload = json.load(respuesta)
+    series = payload["properties"]["parameter"]
+    fill = payload.get("header", {}).get("fill_value", -999)
+    salida = []
+    for mes in range(1, 13):
+        def recopilar(nombre):
+            return [v for ano in range(inicio, fin + 1)
+                    if isinstance((v := series.get(nombre, {}).get(f"{ano}{mes:02d}")), (int, float))
+                    and not isinstance(v, bool) and v != fill and v > -999]
+        lluvia, temperatura = recopilar("PRECTOTCORR"), recopilar("T2M")
+        salida.append({"mes": mes, "lluvia_mm_dia": round(sum(lluvia) / len(lluvia), 2) if len(lluvia) >= 3 else None,
+                       "temperatura_c": round(sum(temperatura) / len(temperatura), 2) if len(temperatura) >= 3 else None,
+                       "anos_lluvia": len(lluvia), "anos_temperatura": len(temperatura)})
+    return {"desde": inicio, "hasta": fin, "meses": salida}
+
+
+@app.get("/referencia-climatica/{distrito}")
+def obtener_referencia_climatica(distrito: str):
     lat, lon = coordenadas(distrito)
-    ano = datetime.now(timezone.utc).year - 1
+    ano = datetime.now(timezone(timedelta(hours=-5))).year
     try:
-        meses = consultar_serie_anual(lat, lon, ano)
+        return {"ubicacion": distrito, "fuente": "NASA POWER", **referencia_mensual(lat, lon, ano)}
+    except (HTTPError, URLError, TimeoutError, OSError, ValueError, KeyError, TypeError) as exc:
+        raise HTTPException(status_code=503, detail="No se pudo obtener la referencia histórica de NASA POWER.") from exc
+
+
+@app.get("/clima-anual/{distrito}")
+def clima_anual(distrito: str, actual: bool = False):
+    lat, lon = coordenadas(distrito)
+    hoy = datetime.now(timezone(timedelta(hours=-5))).date()
+    ano = hoy.year if actual else hoy.year - 1
+    try:
+        meses = consultar_ano_actual(lat, lon, hoy.isoformat()) if actual else consultar_serie_anual(lat, lon, ano)
     except (HTTPError, URLError, TimeoutError, OSError, ValueError, KeyError, TypeError) as exc:
         raise HTTPException(status_code=503, detail="No se pudo consultar el historial anual de NASA POWER.") from exc
-    return {"ano": ano, "meses": meses, "fuente": "NASA POWER", "ubicacion": distrito}
+    return {"ano": ano, "meses": meses, "fuente": "NASA POWER", "ubicacion": distrito, "tipo": "ano_actual" if actual else "historico"}
+
+
+@lru_cache(maxsize=128)
+def consultar_ano_actual(latitud, longitud, fecha_cache):
+    hoy = date.fromisoformat(fecha_cache)
+    parametros = urlencode({"parameters": "T2M,T2M_MIN,PRECTOTCORR", "community": "AG", "longitude": longitud,
+                            "latitude": latitud, "start": f"{hoy.year}0101", "end": hoy.strftime("%Y%m%d"),
+                            "format": "JSON", "time-standard": "LST"})
+    with abrir_nasa(f"{NASA_URL}?{parametros}", timeout=18) as respuesta:
+        payload = json.load(respuesta)
+    series = payload["properties"]["parameter"]
+    fill = payload.get("header", {}).get("fill_value", -999)
+    def valores(nombre, mes):
+        return [(k, v) for k, v in series.get(nombre, {}).items() if k.startswith(f"{hoy.year}{mes:02d}")
+                and k <= hoy.strftime("%Y%m%d") and isinstance(v, (int, float)) and not isinstance(v, bool) and v != fill and v > -999]
+    def promedio(items):
+        return round(sum(v for _, v in items) / len(items), 2) if items else None
+    salida = []
+    for mes in range(1, 13):
+        lluvia = valores("PRECTOTCORR", mes)
+        salida.append({"mes": mes, "temperatura_c": promedio(valores("T2M", mes)),
+                       "minima_media_c": promedio(valores("T2M_MIN", mes)), "lluvia_mm_dia": promedio(lluvia),
+                       "dias_disponibles": len(lluvia), "hasta": max((k for k, _ in lluvia), default=None),
+                       "parcial": mes >= hoy.month})
+    return salida
 
 
 @lru_cache(maxsize=128)
@@ -463,6 +522,20 @@ def respuesta_local_chat(consulta: ConsultaChat):
     lugar = POR_ID.get(consulta.ubicacion, {})
     nombre = lugar.get("nombre", consulta.ubicacion)
     region = lugar.get("region", "")
+    if contexto.get("idioma_respuesta") == "en":
+        lineas = [f"**Area: {nombre}**" + (f" ({region})" if region else "")]
+        if clima.get("fecha"):
+            lineas.append(f"NASA POWER recorded a regional average temperature of {clima.get('temperatura_media_c', 'unavailable')} °C and rainfall of {clima.get('lluvia_mm', 'unavailable')} mm on {clima['fecha']}. These are historical estimates, not a forecast.")
+        if any(word in pregunta for word in ("llov", "lluv", "rain")):
+            lineas.append("I do not have a verified forecast right now. Check the official SENAMHI forecast before planting, irrigating, or harvesting.")
+        elif "rot" in pregunta:
+            lineas.append("As a starting point, alternate crop families, for example potato → broad bean → maize → quinoa. Check your local calendar, available water and previous crop before adopting a plan.")
+        elif "cosech" in pregunta or "harvest" in pregunta:
+            lineas.append("To assess harvest timing, I need to know your crop and variety, planting date, and plant condition. Check maturity, soil moisture and the forecast with a local expert.")
+        else:
+            lineas.append("The calendar contains regional planting references for potato, maize, broad bean and quinoa. Check rainfall, altitude, soil, irrigation and variety with a local expert.")
+        lineas.append("_Basic app response: the AI service is currently unavailable._")
+        return {"respuesta": "\n\n".join(lineas)}
     lineas = [f"**Zona: {nombre}**" + (f" ({region})" if region else "")]
     if clima.get("fecha"):
         lineas.append(f"NASA POWER registró para esta zona el {clima['fecha']}: temperatura media {clima.get('temperatura_media_c', 'sin dato')} °C y lluvia {clima.get('lluvia_mm', 'sin dato')} mm. Son datos regionales históricos, no un pronóstico.")
@@ -474,7 +547,7 @@ def respuesta_local_chat(consulta: ConsultaChat):
         lineas.append("Para decidir la cosecha necesito saber qué cultivo y variedad tienes, cuándo sembraste y cómo está la planta. Revisa madurez, humedad del suelo y previsión de lluvia; confirma la decisión con un técnico local.")
     else:
         lineas.append("En el calendario de la aplicación puedes revisar las referencias regionales de papa, maíz, haba y quinua para tu mes y zona. Para elegir, comprueba lluvia, altitud, suelo, riego y variedad con un técnico local.")
-    lineas.append("_Respuesta básica de la aplicación: la conexión con Groq aún requiere configuración en el servidor._")
+    lineas.append("_Respuesta básica de la aplicación: el servicio de IA no está disponible en este momento._")
     return {"respuesta": "\n\n".join(lineas)}
 
 
