@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useTranslation } from './i18n';
+import { useTranslation, useLanguage } from './i18n';
 import { apiFetch } from './api';
 import './CanalLlamadas.css';
 
@@ -12,6 +12,7 @@ const preguntas = [
 
 export default function CanalLlamadas({ nombreLugar, distrito, datos }) {
   const { tr } = useTranslation();
+  const { language } = useLanguage();
   const [llamada, setLlamada] = useState(false);
   const [pregunta, setPregunta] = useState(null);
   const [respuesta, setRespuesta] = useState('');
@@ -29,7 +30,7 @@ export default function CanalLlamadas({ nombreLugar, distrito, datos }) {
     if (!respuesta || !('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
     const voz = new SpeechSynthesisUtterance(respuesta.replace(/[*_#]/g, ''));
-    voz.lang = 'es-PE';
+    voz.lang = language === 'en' ? 'en-US' : 'es-PE';
     voz.rate = 0.9;
     window.speechSynthesis.speak(voz);
   };
@@ -38,7 +39,7 @@ export default function CanalLlamadas({ nombreLugar, distrito, datos }) {
     setRespuesta('');
     setCargando(true);
     try {
-      const solicitud = await apiFetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ubicacion: distrito, mensajes: [{ role: 'user', content: item.texto }], contexto: { datos_power: datos ? { fecha: datos.fecha, temperatura_media_c: datos.temperatura, lluvia_mm: datos.precipitacion } : null } }) });
+      const solicitud = await apiFetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ubicacion: distrito, mensajes: [{ role: 'user', content: item.texto }], contexto: { idioma_respuesta: language, datos_power: datos ? { fecha: datos.fecha, temperatura_media_c: datos.temperatura, lluvia_mm: datos.precipitacion } : null } }) });
       const resultado = await solicitud.json();
       setRespuesta(solicitud.ok && resultado.respuesta ? resultado.respuesta : respuestas[item.id]);
     } catch {

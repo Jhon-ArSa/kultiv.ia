@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import en from './locales/en.json';
+import qu from './locales/qu.json';
 
 const LanguageContext = createContext(null);
-// Wanka is not enabled until a local speaker validates the full catalog.
-// Do not expose unreliable machine translations of agronomic information.
-const catalogs = { en };
+// The Quechua catalog is partial and requires review by local Wanka speakers.
+const catalogs = { en, qu };
 const normalize = value => value.replace(/\s+/g, ' ').trim();
 const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 const indexes = Object.fromEntries(Object.entries(catalogs).map(([language, catalog]) => [language, {
@@ -41,14 +41,14 @@ export function translate(value, language, depth = 0) {
 
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(() => {
-    try { const saved = localStorage.getItem('raices-language'); return ['es', 'en'].includes(saved) ? saved : 'es'; } catch { return 'es'; }
+    try { const saved = localStorage.getItem('raices-language'); return ['es', 'en', 'qu'].includes(saved) ? saved : 'es'; } catch { return 'es'; }
   });
   useEffect(() => {
     document.documentElement.lang = language === 'qu' ? 'qu-x-wanka' : language;
     document.title = translate('kultiv.IA · Calendario y rotación de cultivos', language);
     try { localStorage.setItem('raices-language', language); } catch { /* Works without storage. */ }
   }, [language]);
-  const value = useMemo(() => ({ language, setLanguage: next => { if (['es', 'en'].includes(next)) setLanguage(next); } }), [language]);
+  const value = useMemo(() => ({ language, setLanguage: next => { if (['es', 'en', 'qu'].includes(next)) setLanguage(next); } }), [language]);
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
 

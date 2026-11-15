@@ -74,7 +74,7 @@ export default function NavigationRail({ page, onNavigate }) {
       {visibleCount < sections.length && <button type="button" className="nav-menu-toggle" aria-label={tr('Más secciones')} aria-expanded={menuOpen} aria-controls="nav-extra" onClick={() => setMenuOpen(open => !open)}><span aria-hidden="true">☰</span><span>{tr('Menú')}</span></button>}
       {menuOpen && <nav className="nav-menu" id="nav-extra" aria-label={tr('Más secciones')}>{sections.slice(visibleCount).map(button)}</nav>}
     </div>
-    <label className="nav-language" ref={languageRef}>🌐 <span className="visually-hidden">{tr('Idioma / Language')}</span><select value={language} onChange={event => setLanguage(event.target.value)}><option value="es">{tr('Español')}</option><option value="en">{tr('English')}</option><option value="qu" disabled>{tr('Quechua wanka (pendiente de validación)')}</option></select></label>
+    <label className="nav-language" ref={languageRef}>🌐 <span className="visually-hidden">{tr('Idioma / Language')}</span><select value={language} onChange={event => setLanguage(event.target.value)}><option value="es">{tr('Español')}</option><option value="en">{tr('English')}</option><option value="qu">Quechua (orientativo)</option></select></label>
     <div className="nav-measure" ref={measureRef} aria-hidden="true">{sections.map(item => <span key={item.id} className="nav-button"><span className="nav-icon">{item.icon}</span>{tr(item.label)}</span>)}</div>
   </header>;
 }
