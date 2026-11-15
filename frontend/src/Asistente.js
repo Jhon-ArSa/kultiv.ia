@@ -1,33 +1,143 @@
-import React, { useState } from 'react';
+import { useTranslation } from "./i18n";
+import React, { useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import ChatTable from './ChatTable';
 import { referencias, regiones } from './zonas';
 import { cultivos } from './Siembras';
-
-const normalizar = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-function responder(pregunta, distrito, nombre, mes, datos) {
-  const q = normalizar(pregunta);
-  const lugar = `${nombre}${regiones[distrito] ? ` (${regiones[distrito]})` : ''}`;
-  const nombreMes = new Date(2024, mes, 1).toLocaleDateString('es-PE', { month: 'long' });
-  const ficha = cultivos.find(c => q.includes(normalizar(c.nombre)));
-  if (/cosech|madur|recolect|apto|apta|listo|lista/.test(q)) return `Para ${lugar}, no puedo determinar si un cultivo está listo para cosechar ni garantizar que la parcela sea apta. Necesito conocer el cultivo y la variedad, la fecha de siembra, su etapa y observar señales de madurez y condiciones de la parcela. La aplicación no dispone de esos datos ni de un diagnóstico satelital. Consulta a un técnico local antes de decidir. Si tu pregunta era sobre cuándo sembrar, pregunta «¿Qué puedo sembrar?».`;
-  if (/clima|temperatura|lluvia|helada|humedad/.test(q)) return datos ? `Para ${lugar}, el último dato disponible de NASA POWER es del ${datos.fecha}: temperatura media ${datos.temperatura} °C, mínima ${datos.temperatura_minima} °C, precipitación ${datos.precipitacion} mm y humedad relativa del aire ${datos.humedad_relativa} %. Son estimaciones regionales de un día pasado, no un pronóstico ni humedad del suelo. Consulta el pronóstico y los avisos oficiales antes de tomar decisiones.` : `Los datos de NASA POWER para ${lugar} están cargando o no están disponibles. No puedo evaluar las condiciones actuales. Revisa la sección de clima e inténtalo de nuevo.`;
-  if (/siembr|cultiv|plant|sembr|riesgo|papa|maiz|quinua|haba/.test(q)) {
-    if (ficha) return `${ficha.nombre} en ${lugar}: ${ficha.periodo} Factores: ${ficha.factores} Riesgos: ${ficha.riesgos} Estas referencias son generales y no confirman aptitud para tu parcela.`;
-    const lista = referencias(distrito, mes);
-    return `Para ${lugar} en ${nombreMes}, ${lista.length ? `la guía contiene referencias regionales de siembra para ${lista.join(' y ')} en algunas zonas y campañas` : 'esta guía no tiene una ventana regional documentada de siembra'}. Esto no confirma que puedas o no sembrar en tu parcela. Revisa lluvias, suelo, riego, variedad y altitud, y consulta el calendario y un técnico local.`;
-  }
-  return 'Puedo ayudarte con preguntas sobre siembra, riesgos de papa, maíz, quinua o haba, clima disponible y preparación para la cosecha. Prueba «¿Qué puedo sembrar?» o «¿Está lista mi papa para cosechar?». Selecciona la ubicación y el mes en la aplicación antes de preguntar.';
-}
-export default function Asistente({ distrito, nombreLugar, mes, datos, ficha }) {
+const API = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+export default function Asistente({
+  distrito,
+  nombreLugar,
+  mes,
+  datos,
+  idioma
+}) {
+  const {
+    tr, locale
+  } = useTranslation();
   const [entrada, setEntrada] = useState('');
   const [mensajes, setMensajes] = useState([]);
-  const enviar = pregunta => {
-    const texto = pregunta.trim(); if (!texto) return;
-    const campos = [['cultivo', 'cultivo'], ['variedad', 'variedad'], ['fechaSiembra', 'fecha de siembra'], ['altitud', 'altitud (m)'], ['suelo', 'estado del suelo'], ['tipoSuelo', 'tipo de suelo'], ['riego', 'riego'], ['lluvia', 'lluvia observada'], ['notas', 'etapa y notas']];
-    const registrados = campos.filter(([clave]) => ficha[clave]).map(([clave, etiqueta]) => `${etiqueta}: ${ficha[clave]}`);
-    const faltantes = campos.filter(([clave]) => !ficha[clave]).map(([, etiqueta]) => etiqueta);
-    const contexto = `\n\nFicha ingresada por ti: ${registrados.length ? registrados.join('; ') : 'sin datos'}. ${faltantes.length ? `Falta completar: ${faltantes.join(', ')}.` : 'Todos los campos están completos.'} Comprueba que esta ficha corresponda a la zona seleccionada. Los datos no están verificados y no permiten por sí solos declarar aptitud.`;
-    setMensajes(actual => [...actual, { pregunta: texto, respuesta: responder(texto, distrito, nombreLugar, mes, datos) + contexto, id: `${Date.now()}-${Math.random()}` }]);
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState('');
+  const [abierto, setAbierto] = useState(false);
+  const solicitud = useRef(null);
+  const finalMensajes = useRef(null);
+  useEffect(() => {
+    setMensajes([]);
+    setError('');
+    setCargando(false);
+    return () => {
+      solicitud.current?.abort();
+      solicitud.current = null;
+    };
+  }, [distrito, idioma]);
+  useEffect(() => {
+    if (abierto) finalMensajes.current?.scrollIntoView?.({
+      block: 'nearest',
+      behavior: 'smooth'
+    });
+  }, [mensajes, cargando, abierto]);
+  useEffect(() => {
+    const abrir = () => setAbierto(true);
+    const enlace = e => {
+      if (e.target.closest('a[href="#asistente"]')) abrir();
+    };
+    window.addEventListener('abrir-asistente', abrir);
+    document.addEventListener('click', enlace);
+    return () => {
+      window.removeEventListener('abrir-asistente', abrir);
+      document.removeEventListener('click', enlace);
+    };
+  }, []);
+  const enviar = async pregunta => {
+    const texto = pregunta.trim();
+    if (!texto || solicitud.current) return;
+    const controller = new AbortController();
+    solicitud.current = controller;
+    const timeout = setTimeout(() => controller.abort('timeout'), 75000);
+    const usuario = {
+      role: 'user',
+      content: texto
+    };
+    const historial = [...mensajes, usuario].slice(-11);
+    setMensajes(historial);
     setEntrada('');
+    setError('');
+    setCargando(true);
+    let planRotacion = null;
+    try {
+      const plan = JSON.parse(localStorage.getItem('raices-rotacion-v1') || 'null');
+      if (plan?.distrito === distrito && Array.isArray(plan.cultivos)) planRotacion = plan.cultivos.slice(0, 4);
+    } catch {
+      planRotacion = null;
+    }
+    const contexto = {
+      zona: nombreLugar,
+      region: regiones[distrito] || null,
+      idioma_respuesta: idioma,
+      plan_rotacion_guardado: planRotacion,
+      mes_consultado: new Date(2024, mes, 1).toLocaleDateString(locale, {
+        month: 'long'
+      }),
+      referencias_regionales: referencias(distrito, mes),
+      fichas_cultivos: cultivos.map(({
+        nombre,
+        periodo,
+        factores,
+        riesgos
+      }) => ({
+        nombre,
+        periodo,
+        factores,
+        riesgos
+      })),
+      datos_power: datos ? {
+        fecha: datos.fecha,
+        temperatura_media_c: datos.temperatura,
+        minima_c: datos.temperatura_minima,
+        lluvia_mm: datos.precipitacion,
+        humedad_relativa_aire_porcentaje: datos.humedad_relativa
+      } : null,
+      ecostress: 'Se buscan escenas, pero no se han extraído ni validado valores ESI o PET.',
+      avisos_senamhi: 'No se consultan automáticamente; disponibles mediante enlaces oficiales.'
+    };
+    try {
+      const r = await fetch(`${API}/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          mensajes: historial,
+          contexto,
+          ubicacion: distrito
+        })
+      });
+      const body = await r.json();
+      if (!r.ok) throw new Error(typeof body.detail === 'string' ? body.detail : 'No se pudo enviar la consulta.');
+      if (typeof body.respuesta !== 'string' || !body.respuesta.trim()) throw new Error('El asistente no devolvió una respuesta. Inténtalo de nuevo.');
+      if (solicitud.current === controller) setMensajes(actual => [...actual, {
+        role: 'assistant',
+        content: body.respuesta
+      }]);
+    } catch (e) {
+      if (solicitud.current === controller) {
+        setMensajes(historial.slice(0, -1));
+        setEntrada(texto);
+        setError(controller.signal.aborted ? 'El asistente tardó demasiado. Tu pregunta está lista para reintentar.' : e instanceof TypeError ? 'No se pudo conectar con el asistente.' : e.message);
+      }
+    } finally {
+      clearTimeout(timeout);
+      if (solicitud.current === controller) {
+        solicitud.current = null;
+        setCargando(false);
+      }
+    }
   };
-  return <section className="calendar-section assistant" id="asistente"><p className="eyebrow">CONSULTA AGRÍCOLA</p><h2>Pregunta a tu asistente</h2><p>Consulta la guía para <strong>{nombreLugar}</strong> y el mes seleccionado. Cambia la zona o el mes en la página para ajustar la consulta.</p><div className="assistant-box"><div className="assistant-messages" aria-live="polite"><div className="assistant-bubble">Hola, puedo ayudarte a consultar siembras, clima y riesgos. También puedo explicarte qué información falta para evaluar una cosecha.</div>{mensajes.map(m => <div key={m.id}><div className="assistant-question">{m.pregunta}</div><div className="assistant-bubble">{m.respuesta}</div></div>)}</div><div className="assistant-suggestions"><button type="button" onClick={() => enviar('¿Qué puedo sembrar?')}>¿Qué puedo sembrar?</button><button type="button" onClick={() => enviar('¿Está listo mi cultivo para cosechar?')}>¿Puedo cosechar?</button><button type="button" onClick={() => enviar('¿Cómo está el clima?')}>Ver clima disponible</button></div><form className="assistant-form" onSubmit={e => { e.preventDefault(); enviar(entrada); }}><label className="visually-hidden" htmlFor="consulta-asistente">Escribe tu pregunta</label><input id="consulta-asistente" value={entrada} maxLength={500} onChange={e => setEntrada(e.target.value)} placeholder="Escribe tu pregunta…" /><button className="primary-action" type="submit">Preguntar</button></form><p className="assistant-note">Asistente de respuestas predefinidas: no utiliza IA ni analiza tu parcela. Consulta los <a href="https://www.gob.pe/9945-pronosticos-agrometeorologicos-del-senamhi" target="_blank" rel="noreferrer">avisos agrometeorológicos de SENAMHI</a> y a un técnico local.</p></div></section>;
+  return <aside className="chat-float" id="asistente"><button className="chat-toggle" type="button" aria-expanded={abierto} aria-controls="ventana-asistente" onClick={() => setAbierto(!abierto)}>{tr(!abierto && <img className="chat-avatar" src={`${process.env.PUBLIC_URL}/logo-02.jpeg`} alt={tr("")} />)}{tr(abierto ? '✕ Cerrar' : 'Pregúntame')}</button>{tr(abierto && <section className="assistant chat-window" id="ventana-asistente" aria-label={tr("Asistente agrícola")}><header className="chat-header"><img className="chat-avatar" src={`${process.env.PUBLIC_URL}/logo-02.jpeg`} alt={tr("")} /><div><strong>{tr("Tu asistente agrícola")}</strong><span>{tr("Zona: ")}{tr(nombreLugar)}</span></div></header><div className="chat-body"><div className="assistant-messages" aria-live="polite"><div className="assistant-bubble">{tr("Hola. Puedo ayudarte a revisar siembras, clima y rotación. Elige una pregunta o escríbeme con tus propias palabras.")}</div>{tr(mensajes.map((m, i) => <div key={i} className={m.role === 'user' ? 'assistant-question' : 'assistant-bubble'}>{tr(m.role === 'assistant' ? <div className="chat-markdown"><ReactMarkdown remarkPlugins={[remarkGfm]} components={{ table: ChatTable }}>{m.content}</ReactMarkdown></div> : m.content)}</div>))}{tr(cargando && <div className="assistant-bubble" role="status">{tr("Consultando la información…")}</div>)}<div ref={finalMensajes} /></div><div className="assistant-suggestions"><button type="button" disabled={cargando} onClick={() => enviar(tr('¿Qué puedo sembrar en mi zona?'))}>{tr("¿Qué puedo sembrar?")}</button><button type="button" disabled={cargando} onClick={() => enviar(tr('¿Va a llover en mi zona?'))}>{tr("¿Va a llover?")}</button><button type="button" disabled={cargando} onClick={() => enviar(tr('¿Cómo puedo organizar la rotación de mis cultivos?'))}>{tr("Mi rotación")}</button><button type="button" disabled={cargando} onClick={() => enviar(tr('¿Qué debo revisar antes de cosechar?'))}>{tr("Antes de cosechar")}</button></div><form className="assistant-form" onSubmit={e => {
+          e.preventDefault();
+          enviar(entrada);
+        }}><label className="visually-hidden" htmlFor="consulta-asistente">{tr("Escribe tu pregunta")}</label><input id="consulta-asistente" value={entrada} disabled={cargando} maxLength={500} onChange={e => setEntrada(e.target.value)} placeholder={tr("Escribe tu pregunta…")} /><button className="primary-action" type="submit" disabled={cargando || !entrada.trim()}>{tr("Enviar")}</button></form>{tr(error && <p className="error" role="alert">{tr(error)}{tr(" Puedes intentar de nuevo.")}</p>)}<p className="assistant-note">{tr("Al preguntar, se envían a Groq tu pregunta, historial reciente, zona, clima y plan de rotación guardado para esa zona. No se envía la dirección guardada ni las coordenadas GPS. Evita incluir datos personales. La IA puede equivocarse.")}</p><p className="assistant-note"><a href="https://www.gob.pe/100546-consultar-el-clima-y-avisos-meteorologicos-con-la-aplicacion-senamhi-peru-movil" target="_blank" rel="noreferrer">{tr("Consultar pronóstico oficial SENAMHI ↗")}</a> · <a href="https://www.gob.pe/9945-pronosticos-agrometeorologicos-del-senamhi" target="_blank" rel="noreferrer">{tr("Boletines agrícolas ↗")}</a></p></div></section>)}</aside>;
 }

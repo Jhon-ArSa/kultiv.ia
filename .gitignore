@@ -10,3 +10,6 @@ Backend/venv/
 # Ignorar archivos temporales
 __pycache__/
 *.pyc
+.env
+.env.*
+!.env.example
